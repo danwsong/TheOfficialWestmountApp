@@ -19,11 +19,9 @@ public class FeedItemDecoration extends RecyclerView.ItemDecoration {
     @Override
     public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
         outRect.left = space;
-        outRect.bottom = space;
+        outRect.top = space / 2;
+        outRect.bottom = space / 2;
         outRect.right = space;
-        if (parent.getChildLayoutPosition(view) == 0) {
-            outRect.top = space;
-        }
     }
 
 }

@@ -12,7 +12,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/feedItemList"
-            android:scrollbars="none" />
+            android:scrollbars="none"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp" />
     </android.support.v4.widget.SwipeRefreshLayout>
 
 </RelativeLayout>

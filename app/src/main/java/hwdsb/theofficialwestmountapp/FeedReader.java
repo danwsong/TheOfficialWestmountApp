@@ -1,6 +1,5 @@
 package hwdsb.theofficialwestmountapp;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,11 +10,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,6 +33,7 @@ public class FeedReader extends AsyncTask<Void, Void, Void> {
     Context context;
     URL url;
     ArrayList<FeedItem> feedItems = new ArrayList<>();
+    static ArrayList<FeedItemDecoration> feedItemDecorations = new ArrayList<>();
     RecyclerView feedItemList;
 
     public FeedReader(Context context, RecyclerView feedItemList) {
@@ -59,8 +57,14 @@ public class FeedReader extends AsyncTask<Void, Void, Void> {
             }
         });
         FeedItemAdapter adapter = new FeedItemAdapter(context, feedItems);
+        if (feedItemDecorations.size() != 0) {
+            feedItemList.removeItemDecoration(feedItemDecorations.get(0));
+            feedItemDecorations.remove(0);
+        }
         feedItemList.setLayoutManager(new LinearLayoutManager(context));
-        feedItemList.addItemDecoration(new FeedItemDecoration(32));
+        FeedItemDecoration itemDecoration = new FeedItemDecoration(32);
+        feedItemList.addItemDecoration(itemDecoration, 0);
+        feedItemDecorations.add(itemDecoration);
         feedItemList.setAdapter(adapter);
     }
 
@@ -68,7 +72,7 @@ public class FeedReader extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... params) {
         try {
             processRssFeed(retrieveDataFromRssFeed(new URL("https://595.commons.hwdsb.on.ca/presentation/announcements/feed/")));
-            processRssFeed(retrieveDataFromRssFeed(new URL("http://www.hwdsb.on.ca/westmount/2016/feed/")));
+            processRssFeed(retrieveDataFromRssFeed(new URL("https://www.hwdsb.on.ca/westmount/2016/feed/")));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -121,7 +125,7 @@ public class FeedReader extends AsyncTask<Void, Void, Void> {
             InputStream inputStream = connection.getInputStream();
             DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = builderFactory.newDocumentBuilder();
-            return builder.parse(new ByteArrayInputStream(streamToString(inputStream).replace("<description><![CDATA[", "<description>").replace("]]></description>", "</description>").getBytes(Charset.forName("UTF-8"))));
+            return builder.parse(inputStream);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

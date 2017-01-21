@@ -6,11 +6,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-
-import com.daimajia.androidanimations.library.Techniques;
-import com.daimajia.androidanimations.library.YoYo;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,9 +30,7 @@ public class FeedItemAdapter extends RecyclerView.Adapter<FeedItemAdapter.FeedIt
 
     @Override
     public FeedItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.feed_item, parent, false);
-        FeedItemViewHolder viewHolder = new FeedItemViewHolder(view);
-        return viewHolder;
+        return new FeedItemViewHolder(LayoutInflater.from(context).inflate(R.layout.feed_item, parent, false));
     }
 
     @Override
@@ -46,8 +43,25 @@ public class FeedItemAdapter extends RecyclerView.Adapter<FeedItemAdapter.FeedIt
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                YoYo.with(Techniques.FadeIn).playOn(holder.cardView);
-                holder.cardView.setVisibility(View.VISIBLE);
+                AlphaAnimation animation = new AlphaAnimation(0.0f, 1.0f);
+                animation.setDuration(1000);
+                animation.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        holder.cardView.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                holder.cardView.startAnimation(animation);
             }
         });
         holder.webView.loadDataWithBaseURL(null, summary, "text/html", "utf-8", null);
