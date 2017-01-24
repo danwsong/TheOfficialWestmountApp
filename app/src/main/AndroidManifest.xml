@@ -3,6 +3,9 @@
     package="hwdsb.theofficialwestmountapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-feature
+        android:name="android.hardware.sensor.accelerometer"
+        android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -20,6 +23,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".PlannerDetailActivity"></activity>
+
+        <receiver android:name=".PlannerDetailActivity$AlarmReceiver"></receiver>
     </application>
 
 </manifest>

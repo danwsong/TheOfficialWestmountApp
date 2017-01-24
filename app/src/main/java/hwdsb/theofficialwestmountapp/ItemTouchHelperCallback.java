@@ -10,6 +10,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     private final ItemTouchHelperAdapter itemTouchHelperAdapter;
+    public int dragFlags = 0;
 
     public ItemTouchHelperCallback(ItemTouchHelperAdapter itemTouchHelperAdapter) {
         this.itemTouchHelperAdapter = itemTouchHelperAdapter;
@@ -17,7 +18,7 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     @Override
     public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-        return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.START | ItemTouchHelper.END);
+        return makeMovementFlags(dragFlags, ItemTouchHelper.START | ItemTouchHelper.END);
     }
 
     @Override

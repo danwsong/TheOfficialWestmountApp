@@ -19,7 +19,7 @@ public class FeedFragment extends Fragment {
     ArrayList<FeedItemDecoration> itemDecorations;
 
     public FeedFragment() {
-        itemDecorations = new ArrayList<FeedItemDecoration>();
+        itemDecorations = new ArrayList<>();
     }
 
     @Override

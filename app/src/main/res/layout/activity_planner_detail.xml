@@ -1,13 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="hwdsb.theofficialwestmountapp.TimerFragment"
+    tools:context="hwdsb.theofficialwestmountapp.PlannerFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -15,23 +18,25 @@
             android:orientation="vertical"
             android:layout_alignParentTop="true">
 
-            <android.support.v7.widget.RecyclerView
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/activityListView"
-                android:layout_alignParentTop="true"
+                android:id="@+id/courseTitle"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
-
-            </android.support.v7.widget.RecyclerView>
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:textAlignment="center"
+                android:fontFamily="sans-serif"
+                android:textSize="32sp"
+                android:text="Sample Course"
+                android:layout_marginTop="16dp"
+                android:lines="1" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/totalTimeSpent"
-                android:layout_below="@+id/activityListView"
+                android:id="@+id/courseDefaultText"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:layout_marginLeft="16dp"
@@ -39,20 +44,20 @@
                 android:textAlignment="center"
                 android:fontFamily="sans-serif"
                 android:textSize="16sp"
-                android:text="Sample" />
+                android:text="Please add a goal to begin."
+                android:layout_marginTop="16dp" />
 
-            <Button
-                android:text="Start Timer"
+            <android.support.v7.widget.RecyclerView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/startTimer"
-                android:layout_below="@+id/totalTimeSpent"
+                android:id="@+id/goalListView"
+                android:layout_alignParentTop="true"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp" />
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp">
+
+            </android.support.v7.widget.RecyclerView>
 
         </LinearLayout>
 
@@ -63,7 +68,7 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         app:fabSize="normal"
-        android:id="@+id/addNewActivity"
+        android:id="@+id/addNewGoal"
         android:src="@drawable/ic_floatingactionbutton"
         android:layout_margin="16dp"
         android:layout_alignParentBottom="true"

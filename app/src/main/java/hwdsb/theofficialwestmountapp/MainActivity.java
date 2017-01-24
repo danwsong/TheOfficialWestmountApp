@@ -23,12 +23,10 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
+
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mSectionsPagerAdapter.context = this;
 
-        // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setOffscreenPageLimit(3);
         mViewPager.setAdapter(mSectionsPagerAdapter);
@@ -64,7 +62,9 @@ public class MainActivity extends AppCompatActivity {
                     timerFragment.context = context;
                     return timerFragment;
                 case 2:
-                    return new PlannerFragment();
+                    PlannerFragment plannerFragment = new PlannerFragment();
+                    plannerFragment.context = context;
+                    return plannerFragment;
             }
             return null;
         }

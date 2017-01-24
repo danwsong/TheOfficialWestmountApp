@@ -37,6 +37,7 @@ public class TimerFragment extends Fragment {
     static ArrayList<Activity> activities = new ArrayList<>();
     static long timeStarted = 0;
     static boolean running = false;
+    Handler handler;
 
     public TimerFragment() {
     }
@@ -80,7 +81,8 @@ public class TimerFragment extends Fragment {
         feedItemDecorations.add(itemDecoration);
         TimerAdapter timerAdapter = new TimerAdapter(context);
         activityListView.setAdapter(timerAdapter);
-        ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(timerAdapter);
+        ItemTouchHelperCallback callback = new ItemTouchHelperCallback(timerAdapter);
+        callback.dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
         itemTouchHelper.attachToRecyclerView(activityListView);
         startButton = (Button) rootView.findViewById(R.id.startTimer);
@@ -95,13 +97,13 @@ public class TimerFragment extends Fragment {
                         addNewActivityButton.setEnabled(!running);
                         totalTimeSpent.setVisibility(View.GONE);
 
-                        final Handler handler = new Handler() {
+                        handler = new Handler() {
                             @Override
                             public void handleMessage(Message msg) {
                                 switch (msg.what) {
                                     case 0:
                                         if (activities.size() >= 1) {
-                                            NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_notification).setContentTitle("Period Planner").setContentText("Start working on " + activities.get(0).activityName + ".").setAutoCancel(true);
+                                            NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_notification).setContentTitle("Period Planner").setContentText("Start working on " + activities.get(0).activityName + ".").setAutoCancel(true).setVibrate(new long[]{0, 375, 125, 375});
                                             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                                             notificationManager.cancel(0);
                                             notificationManager.notify(0, builder.build());
@@ -125,7 +127,7 @@ public class TimerFragment extends Fragment {
                                             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                                             notificationManager.cancel(0);
                                         } else {
-                                            NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_notification).setContentTitle("Period Planner").setContentText("Start working on " + activities.get(1).activityName + ".").setAutoCancel(true);
+                                            NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_notification).setContentTitle("Period Planner").setContentText("Start working on " + activities.get(1).activityName + ".").setAutoCancel(true).setVibrate(new long[]{0, 375, 125, 375});
                                             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                                             notificationManager.cancel(0);
                                             notificationManager.notify(0, builder.build());
@@ -189,6 +191,8 @@ public class TimerFragment extends Fragment {
 
                     NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                     notificationManager.cancelAll();
+
+                    handler.removeCallbacksAndMessages(null);
                 }
             }
         });
@@ -200,7 +204,7 @@ public class TimerFragment extends Fragment {
         if (timeSpent == "" || activityName == "") {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setTitle("Invalid Activity Name or Time Spent");
-            builder.setMessage("Your activity name or time spent on the activity cannot be empty");
+            builder.setMessage("Your activity name or time spent on the activity cannot be empty.");
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {

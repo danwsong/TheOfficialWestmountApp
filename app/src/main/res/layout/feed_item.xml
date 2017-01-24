@@ -6,7 +6,8 @@
     android:layout_height="wrap_content"
     android:id="@+id/cardView"
     app:cardElevation="4dp"
-    app:cardBackgroundColor="@color/cardview_light_background">
+    app:cardBackgroundColor="@color/cardview_light_background"
+    android:visibility="invisible">
 
     <RelativeLayout
         android:layout_width="match_parent"
