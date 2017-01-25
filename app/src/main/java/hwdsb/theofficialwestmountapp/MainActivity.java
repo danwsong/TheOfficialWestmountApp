@@ -16,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
 
+    // Instantiate main view, toolbar, view pager, and tabbed layout
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,9 +36,9 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(mViewPager);
     }
 
+    // Unused because no menu items
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
             super(fm);
         }
 
+        // Get fragment for tab position
         @Override
         public Fragment getItem(int position) {
             switch (position) {
@@ -69,11 +71,13 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
 
+        // Get number of tabs
         @Override
         public int getCount() {
             return 3;
         }
 
+        // Get title of tabs
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {

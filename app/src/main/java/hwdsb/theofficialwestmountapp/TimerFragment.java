@@ -1,8 +1,10 @@
 package hwdsb.theofficialwestmountapp;
 
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,6 +44,7 @@ public class TimerFragment extends Fragment {
     public TimerFragment() {
     }
 
+    // Instantiate the main view for the timer view, instantiate the other views within the main view, and when the start timer button is pressed, notify the user every time a new activity begins
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_timer, container, false);
@@ -103,7 +106,7 @@ public class TimerFragment extends Fragment {
                                 switch (msg.what) {
                                     case 0:
                                         if (activities.size() >= 1) {
-                                            NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_notification).setContentTitle("Period Planner").setContentText("Start working on " + activities.get(0).activityName + ".").setAutoCancel(true).setVibrate(new long[]{0, 375, 125, 375});
+                                            NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_notification).setContentTitle("Period Planner").setContentText("Start working on " + activities.get(0).activityName + ".").setContentIntent(PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT)).setVibrate(new long[]{0, 375, 125, 375});
                                             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                                             notificationManager.cancel(0);
                                             notificationManager.notify(0, builder.build());
@@ -127,7 +130,7 @@ public class TimerFragment extends Fragment {
                                             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                                             notificationManager.cancel(0);
                                         } else {
-                                            NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_notification).setContentTitle("Period Planner").setContentText("Start working on " + activities.get(1).activityName + ".").setAutoCancel(true).setVibrate(new long[]{0, 375, 125, 375});
+                                            NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_notification).setContentTitle("Period Planner").setContentText("Start working on " + activities.get(1).activityName + ".").setContentIntent(PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT)).setVibrate(new long[]{0, 375, 125, 375});
                                             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                                             notificationManager.cancel(0);
                                             notificationManager.notify(0, builder.build());
@@ -200,6 +203,7 @@ public class TimerFragment extends Fragment {
         return rootView;
     }
 
+    // If the activity name or time spent is blank, the time spent is equal to 0, or the total time spent with the new time spent is greater than the minutes in a period, prompt the user again, otherwise add the new timer activity to the data array
     public void addNewActivity(final String activityName, String timeSpent) {
         if (timeSpent == "" || activityName == "") {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -245,6 +249,7 @@ public class TimerFragment extends Fragment {
         }
     }
 
+    // Display an alert prompting the user for information about the new timer activity they are creating
     public void displayNewActivityAlert(String startingText) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("New Activity");
@@ -274,6 +279,7 @@ public class TimerFragment extends Fragment {
         builder.show();
     }
 
+    // Data structure for timer activity containing name and time spent
     public class Activity {
 
         public String activityName;

@@ -19,19 +19,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Scanner;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-/**
- * Created by danielsong on 2017-01-18.
- */
-
 public class FeedReader extends AsyncTask<Void, Void, Void> {
 
     Context context;
-    URL url;
     ArrayList<FeedItem> feedItems = new ArrayList<>();
     static ArrayList<FeedItemDecoration> feedItemDecorations = new ArrayList<>();
     RecyclerView feedItemList;
@@ -41,11 +35,13 @@ public class FeedReader extends AsyncTask<Void, Void, Void> {
         this.feedItemList = feedItemList;
     }
 
+    // No task to execute before loading data from URLs
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
     }
 
+    // Once finished loading data, hide refreshing progress view, sort feed data array by publication date, and instantiate the recycler view acting as the user interface for the feed data
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
@@ -56,18 +52,20 @@ public class FeedReader extends AsyncTask<Void, Void, Void> {
                 return o2.getPubDate().compareTo(o1.getPubDate());
             }
         });
-        FeedItemAdapter adapter = new FeedItemAdapter(context, feedItems);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
+        FeedItemAdapter adapter = new FeedItemAdapter(context, feedItems, linearLayoutManager);
         if (feedItemDecorations.size() != 0) {
             feedItemList.removeItemDecoration(feedItemDecorations.get(0));
             feedItemDecorations.remove(0);
         }
-        feedItemList.setLayoutManager(new LinearLayoutManager(context));
+        feedItemList.setLayoutManager(linearLayoutManager);
         FeedItemDecoration itemDecoration = new FeedItemDecoration(32);
         feedItemList.addItemDecoration(itemDecoration, 0);
         feedItemDecorations.add(itemDecoration);
         feedItemList.setAdapter(adapter);
     }
 
+    // Loading in the feed data from two URLs
     @Override
     protected Void doInBackground(Void... params) {
         try {
@@ -79,6 +77,7 @@ public class FeedReader extends AsyncTask<Void, Void, Void> {
         return null;
     }
 
+    // Add items to the feed data array from the RSS format feed URLs
     private void processRssFeed(Document data) {
         if (data != null) {
             Element root = data.getDocumentElement();
@@ -118,6 +117,7 @@ public class FeedReader extends AsyncTask<Void, Void, Void> {
         }
     }
 
+    // Convert the URL into a Document readable by the Android API
     public Document retrieveDataFromRssFeed(URL url) {
         try {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -130,11 +130,6 @@ public class FeedReader extends AsyncTask<Void, Void, Void> {
             e.printStackTrace();
             return null;
         }
-    }
-
-    public String streamToString(InputStream inputStream) {
-        Scanner scanner = new Scanner(inputStream).useDelimiter("\\A");
-        return scanner.hasNext() ? scanner.next() : "";
     }
 
 }

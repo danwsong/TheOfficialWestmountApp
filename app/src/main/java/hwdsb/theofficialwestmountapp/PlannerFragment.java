@@ -10,7 +10,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +32,7 @@ public class PlannerFragment extends Fragment {
     public PlannerFragment() {
     }
 
+    // Instantiate the main view for the planner view, load in the course names from persistent data storage, and instantiate the other views
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_planner, container, false);
@@ -49,7 +49,6 @@ public class PlannerFragment extends Fragment {
         addNewCourseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("", "Working?");
                 displayNewCourseAlert("");
             }
         });
@@ -77,6 +76,7 @@ public class PlannerFragment extends Fragment {
         return rootView;
     }
 
+    // Display an alert prompting the user for information about the new course they are adding
     public void displayNewCourseAlert(String startingText) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("New Course");
@@ -105,6 +105,7 @@ public class PlannerFragment extends Fragment {
         builder.show();
     }
 
+    // If the course name is empty or the course name has already been used, prompt the user again, otherwise add the course to the array containing the course names and save the new course to persistent data storage
     public void addNewCourse(final String courseName) {
         if (courseName == "") {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);

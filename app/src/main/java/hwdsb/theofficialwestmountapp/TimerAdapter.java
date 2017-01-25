@@ -22,11 +22,13 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
         this.context = context;
     }
 
+    // Instantiate the card views within the timer recycler view
     @Override
     public TimerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new TimerAdapter.TimerViewHolder(LayoutInflater.from(context).inflate(R.layout.activity_layout, parent, false));
     }
 
+    // Update the card views with data from the timer activities array and fade the card views in
     @Override
     public void onBindViewHolder(final TimerViewHolder holder, int position) {
         final TimerFragment.Activity activity = TimerFragment.activities.get(position);
@@ -54,11 +56,13 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
         holder.cardView.startAnimation(animation);
     }
 
+    // Get the number of card views to instantiate, equal to the number of activities
     @Override
     public int getItemCount() {
         return TimerFragment.activities.size();
     }
 
+    // When item is held and dragged, update the data array accordingly
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
         TimerFragment.Activity activity = TimerFragment.activities.remove(fromPosition);
@@ -66,6 +70,7 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
         notifyItemMoved(fromPosition, toPosition);
     }
 
+    // When item is slid to the left or right, update the data array accordingly
     @Override
     public void onItemDismiss(int position) {
         TimerFragment.totalTime -= TimerFragment.activities.remove(position).timeSpent;
@@ -73,7 +78,7 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
         notifyItemRemoved(position);
     }
 
-    public class TimerViewHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
+    public class TimerViewHolder extends RecyclerView.ViewHolder {
         TextView textView, numberView;
         CardView cardView;
 
@@ -82,16 +87,6 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.TimerViewHol
             textView = (TextView) itemView.findViewById(R.id.textView);
             numberView = (TextView) itemView.findViewById(R.id.numberView);
             cardView = (CardView) itemView.findViewById(R.id.activityCardView);
-        }
-
-        @Override
-        public void onItemSelected() {
-
-        }
-
-        @Override
-        public void onItemClear() {
-
         }
     }
 

@@ -1,11 +1,9 @@
 package hwdsb.theofficialwestmountapp;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,9 +16,6 @@ import android.widget.TextView;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-/**
- * Created by danielsong on 2017-01-23.
- */
 public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseViewHolder> implements ItemTouchHelperAdapter {
 
     Context context;
@@ -29,21 +24,30 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
         this.context = context;
     }
 
+    // Instantiate the card views within the recycler view
     @Override
     public CourseViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new CourseViewHolder(LayoutInflater.from(context).inflate(R.layout.goal_layout, parent, false));
     }
 
+    // Update the card views based on the data found in the goals array and fade the card views in
     @Override
-    public void onBindViewHolder(final CourseViewHolder holder, int position) {
+    public void onBindViewHolder(final CourseViewHolder holder, final int position) {
         final PlannerDetailActivity.Goal goal = ((PlannerDetailActivity) context).goals.get(position);
         holder.goalNameText.setText(goal.goalName);
-        Calendar currentCalendar = Calendar.getInstance();
-        Calendar goalCalendar = Calendar.getInstance();
+        final Calendar currentCalendar = Calendar.getInstance();
+        final Calendar goalCalendar = Calendar.getInstance();
         goalCalendar.setTime(goal.goalDate);
-        if (goalCalendar.get(Calendar.YEAR) < currentCalendar.get(Calendar.YEAR) || (goalCalendar.get(Calendar.YEAR) == currentCalendar.get(Calendar.YEAR) && goalCalendar.get(Calendar.MONTH) < currentCalendar.get(Calendar.MONTH)) || (goalCalendar.get(Calendar.YEAR) == currentCalendar.get(Calendar.YEAR) && goalCalendar.get(Calendar.MONTH) == currentCalendar.get(Calendar.MONTH) && goalCalendar.get(Calendar.DAY_OF_MONTH) < currentCalendar.get(Calendar.DAY_OF_MONTH))) {
+        // Set goal name to red if the goal date has already been passed, and green if marked complete
+        if (goal.markedComplete) {
+            holder.goalDateText.setTextColor(Color.argb(255, 64, 192, 64));
+            holder.goalNameText.setTextColor(Color.argb(255, 64, 192, 64));
+        } else if (goalCalendar.get(Calendar.YEAR) < currentCalendar.get(Calendar.YEAR) || (goalCalendar.get(Calendar.YEAR) == currentCalendar.get(Calendar.YEAR) && goalCalendar.get(Calendar.MONTH) < currentCalendar.get(Calendar.MONTH)) || (goalCalendar.get(Calendar.YEAR) == currentCalendar.get(Calendar.YEAR) && goalCalendar.get(Calendar.MONTH) == currentCalendar.get(Calendar.MONTH) && goalCalendar.get(Calendar.DAY_OF_MONTH) < currentCalendar.get(Calendar.DAY_OF_MONTH))) {
             holder.goalNameText.setTextColor(Color.RED);
             holder.goalDateText.setTextColor(Color.RED);
+        } else {
+            holder.goalDateText.setTextColor(ContextCompat.getColor(context, android.R.color.tertiary_text_light));
+            holder.goalNameText.setTextColor(ContextCompat.getColor(context, android.R.color.tertiary_text_light));
         }
         holder.goalDateText.setText(new SimpleDateFormat("MMMM d, y").format(goal.goalDate));
         holder.goalCardView.setVisibility(View.INVISIBLE);
@@ -66,25 +70,37 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
             }
         });
         holder.goalCardView.startAnimation(animation);
+        holder.goalCardView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                ((PlannerDetailActivity) context).goals.set(position, new PlannerDetailActivity.Goal(goal.goalName, goal.goalDate, !goal.markedComplete));
+                SharedPreferences preferences = context.getSharedPreferences(((PlannerDetailActivity) context).courseName, 0);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString(Integer.toString(position) + "complete", Boolean.toString(((PlannerDetailActivity) context).goals.get(position).markedComplete));
+                editor.commit();
+                notifyItemChanged(position);
+
+                return true;
+            }
+        });
     }
 
+    // Get the number of card views to instantiate, equal to the number of goals
     @Override
     public int getItemCount() {
         return ((PlannerDetailActivity) context).goals.size();
     }
 
+    // Moving items is not allowed as items are sorted by due date
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
 
     }
 
+    // When the goal is slid to the left or right, remove the goal from the data array, save the updated array to data persistence, and remove the scheduled notification associated with the goal that was removed
     @Override
     public void onItemDismiss(int position) {
-        PlannerDetailActivity.Goal goal = ((PlannerDetailActivity) context).goals.remove(position);
-        AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(context, PlannerDetailActivity.AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent.putExtra("courseName", ((PlannerDetailActivity) context).courseName).putExtra("goalName", goal.goalName), PendingIntent.FLAG_UPDATE_CURRENT);
-        manager.cancel(pendingIntent);
+        ((PlannerDetailActivity) context).goals.remove(position);
         if (((PlannerDetailActivity) context).goals.size() == 0) {
             PlannerDetailActivity.courseDefaultText.setVisibility(View.VISIBLE);
         } else {
@@ -95,13 +111,14 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
         editor.clear();
         for (int i = 0; i < ((PlannerDetailActivity) context).goals.size(); i++) {
             editor.putString(Integer.toString(i) + "name", ((PlannerDetailActivity) context).goals.get(i).goalName);
-            editor.putLong(Integer.toString(i) + "date", ((PlannerDetailActivity) context).goals.get(i).goalDate.getTime());
+            editor.putString(Integer.toString(i) + "date", Long.toString(((PlannerDetailActivity) context).goals.get(i).goalDate.getTime()));
+            editor.putString(Integer.toString(i) + "complete", Boolean.toString(((PlannerDetailActivity) context).goals.get(i).markedComplete));
         }
         editor.commit();
         notifyItemRemoved(position);
     }
 
-    public class CourseViewHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
+    public class CourseViewHolder extends RecyclerView.ViewHolder {
         CardView goalCardView;
         TextView goalNameText, goalDateText;
 
@@ -112,15 +129,6 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseView
             goalDateText = (TextView) itemView.findViewById(R.id.goalDateText);
         }
 
-        @Override
-        public void onItemSelected() {
-
-        }
-
-        @Override
-        public void onItemClear() {
-
-        }
     }
 
 }

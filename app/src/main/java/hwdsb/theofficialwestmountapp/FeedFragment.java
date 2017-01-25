@@ -22,10 +22,12 @@ public class FeedFragment extends Fragment {
         itemDecorations = new ArrayList<>();
     }
 
+    // Instantiate the main view for the feed view, instantiate the recycler view within the main view, and begin loading data from the feed URLs
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_feed, container, false);
         feedItemList = (RecyclerView) rootView.findViewById(R.id.feedItemList);
+        feedItemList.setFocusable(false);
         swipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setRefreshing(true);
         new FeedReader(context, feedItemList).execute();

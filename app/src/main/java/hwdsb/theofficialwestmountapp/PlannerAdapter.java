@@ -12,10 +12,6 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.TextView;
 
-/**
- * Created by danielsong on 2017-01-23.
- */
-
 public class PlannerAdapter extends RecyclerView.Adapter<PlannerAdapter.PlannerViewHolder> implements ItemTouchHelperAdapter {
 
     Context context;
@@ -24,6 +20,7 @@ public class PlannerAdapter extends RecyclerView.Adapter<PlannerAdapter.PlannerV
         this.context = context;
     }
 
+    // When course is held and dragged, update view and the array containing the names of the courses, and update persistent data storage
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
         String courseName = PlannerFragment.courses.remove(fromPosition);
@@ -37,9 +34,10 @@ public class PlannerAdapter extends RecyclerView.Adapter<PlannerAdapter.PlannerV
         notifyItemMoved(fromPosition, toPosition);
     }
 
+    // When item is slide to the left or right, update view, text view with no items message, the array containing the names of the courses, and update persistent data storage
     @Override
     public void onItemDismiss(int position) {
-        PlannerFragment.courses.remove(position);
+        context.getSharedPreferences(PlannerFragment.courses.remove(position), 0).edit().clear().commit();
         if (PlannerFragment.courses.size() == 0) {
             PlannerFragment.plannerText.setVisibility(View.VISIBLE);
         } else {
@@ -51,14 +49,17 @@ public class PlannerAdapter extends RecyclerView.Adapter<PlannerAdapter.PlannerV
             editor.putString(Integer.toString(i), PlannerFragment.courses.get(i));
         }
         editor.commit();
+
         notifyItemRemoved(position);
     }
 
+    // Instantiate the individual card views within the recycler view
     @Override
     public PlannerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new PlannerViewHolder(LayoutInflater.from(context).inflate(R.layout.course_layout, parent, false));
     }
 
+    // Update individual card view with data from the courses array and fade the card view in
     @Override
     public void onBindViewHolder(final PlannerViewHolder holder, int position) {
         final String courseName = PlannerFragment.courses.get(position);
@@ -93,12 +94,13 @@ public class PlannerAdapter extends RecyclerView.Adapter<PlannerAdapter.PlannerV
         });
     }
 
+    // Get number of items in the recycler view
     @Override
     public int getItemCount() {
         return PlannerFragment.courses.size();
     }
 
-    public class PlannerViewHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
+    public class PlannerViewHolder extends RecyclerView.ViewHolder {
 
         TextView courseTextView;
         CardView cardView;
@@ -108,17 +110,6 @@ public class PlannerAdapter extends RecyclerView.Adapter<PlannerAdapter.PlannerV
             cardView = (CardView) itemView.findViewById(R.id.plannerCardView);
             courseTextView = (TextView) itemView.findViewById(R.id.courseNameTextView);
         }
-
-        @Override
-        public void onItemSelected() {
-
-        }
-
-        @Override
-        public void onItemClear() {
-
-        }
-
     }
 
 }

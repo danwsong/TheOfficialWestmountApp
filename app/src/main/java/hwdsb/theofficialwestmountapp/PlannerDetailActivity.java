@@ -1,23 +1,20 @@
 package hwdsb.theofficialwestmountapp;
 
-import android.app.AlarmManager;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.provider.CalendarContract;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -33,25 +30,26 @@ import java.util.Map;
 
 public class PlannerDetailActivity extends AppCompatActivity {
 
-    static RecyclerView goalListView;
+    RecyclerView goalListView;
     FloatingActionButton addNewGoalButton;
     static ArrayList<FeedItemDecoration> feedItemDecorations = new ArrayList<>();
     static TextView courseDefaultText;
-    ArrayList<Goal> goals = new ArrayList<>();
+    static ArrayList<Goal> goals;
     TextView courseTitle;
     static String courseName;
 
+    // Instantiate the main view for the course detail activity, load goals for the course from persistent data storage, and instantiate other views within the main view
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_planner_detail);
-
+        courseName = getIntent().getExtras().getString("courseName");
         SharedPreferences preferences = getSharedPreferences(courseName, 0);
         Map<String, String> courseSettings = (Map<String, String>) preferences.getAll();
-        for (int i = 0; i < courseSettings.size() / 2; i++) {
-            goals.add(new Goal(courseSettings.get(Integer.toString(i) + "name"), new Date(Long.parseLong(courseSettings.get(Integer.toString(i) + "date")))));
+        goals = new ArrayList<>();
+        for (int i = 0; i < courseSettings.size() / 3; i++) {
+            goals.add(new Goal(courseSettings.get(Integer.toString(i) + "name"), new Date(Long.parseLong(courseSettings.get(Integer.toString(i) + "date"))), Boolean.parseBoolean(courseSettings.get(Integer.toString(i) + "complete"))));
         }
-
         addNewGoalButton = (FloatingActionButton) findViewById(R.id.addNewGoal);
         addNewGoalButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,8 +72,7 @@ public class PlannerDetailActivity extends AppCompatActivity {
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
         itemTouchHelper.attachToRecyclerView(goalListView);
         courseTitle = (TextView) findViewById(R.id.courseTitle);
-        Bundle bundle = getIntent().getExtras();
-        courseTitle.setText(bundle.getString("courseName"));
+        courseTitle.setText(courseName);
         if (goals.size() == 0) {
             PlannerDetailActivity.courseDefaultText.setVisibility(View.VISIBLE);
         } else {
@@ -83,6 +80,19 @@ public class PlannerDetailActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    // Display an alert prompting the user for data for the new goal they are creating
     public void displayNewGoalAlert(String startingText, final Date startingDate) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("New Goal");
@@ -120,6 +130,7 @@ public class PlannerDetailActivity extends AppCompatActivity {
         builder.show();
     }
 
+    // If the goal name is empty, the goal date is before the current data, or the goal name has already been used, prompt the user again, otherwise add the new goal to the data array and save the new goal to persistent data storage and create a notification that is to be issued one day before the goal date
     private void addNewGoal(final String goalName, final Date goalDate) throws IntentFilter.MalformedMimeTypeException {
         Calendar currentCalendar = Calendar.getInstance();
         Calendar goalCalendar = Calendar.getInstance();
@@ -162,7 +173,7 @@ public class PlannerDetailActivity extends AppCompatActivity {
                     return;
                 }
             }
-            Goal goal = new Goal(goalName, goalDate);
+            Goal goal = new Goal(goalName, goalDate, false);
             goals.add(goal);
 
             Collections.sort(goals, new Comparator<Goal>() {
@@ -184,41 +195,48 @@ public class PlannerDetailActivity extends AppCompatActivity {
             for (int i = 0; i < goals.size(); i++) {
                 editor.putString(Integer.toString(i) + "name", goals.get(i).goalName);
                 editor.putString(Integer.toString(i) + "date", Long.toString(goals.get(i).goalDate.getTime()));
+                editor.putString(Integer.toString(i) + "complete", Boolean.toString(goals.get(i).markedComplete));
             }
             editor.commit();
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(goalDate);
-            AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-            Intent intent = new Intent(this, AlarmReceiver.class);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent.putExtra("courseName", courseName).putExtra("goalName", goalName), PendingIntent.FLAG_UPDATE_CURRENT);
-            manager.set(AlarmManager.RTC, calendar.getTimeInMillis() + 32400000, pendingIntent);
 
             if (goals.size() == 0) {
                 PlannerDetailActivity.courseDefaultText.setVisibility(View.VISIBLE);
             } else {
                 PlannerDetailActivity.courseDefaultText.setVisibility(View.GONE);
             }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Add Goal to Calendar");
+            builder.setMessage("Would you like to add this goal to your calendar?");
+            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(goalDate);
+
+                    Intent intent = new Intent(Intent.ACTION_INSERT).setData(CalendarContract.Events.CONTENT_URI);
+                    intent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, calendar.getTimeInMillis());
+                    intent.putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, true);
+                    intent.putExtra(CalendarContract.Events.TITLE, courseName);
+                    intent.putExtra(CalendarContract.Events.DESCRIPTION, goalName);
+                    startActivity(intent);
+                }
+            });
+            builder.setNegativeButton("No", null);
+            builder.show();
         }
     }
 
-    public class Goal {
+    // Data structure for the goal containing the name and due date
+    static public class Goal {
         String goalName;
         Date goalDate;
+        Boolean markedComplete;
 
-        public Goal(String goalName, Date goalDate) {
+        public Goal(String goalName, Date goalDate, Boolean markedComplete) {
             this.goalName = goalName;
             this.goalDate = goalDate;
-        }
-    }
-
-    static public class AlarmReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic_notification).setContentTitle("Course Schedule").setContentText(intent.getExtras().get("goalName") + " for " + intent.getExtras().get("courseName") + " is due tomorrow.").setAutoCancel(true).setVibrate(new long[]{0, 375, 125, 375});
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify((int) (System.currentTimeMillis() % (long) Integer.MAX_VALUE), builder.build());
+            this.markedComplete = markedComplete;
         }
     }
 

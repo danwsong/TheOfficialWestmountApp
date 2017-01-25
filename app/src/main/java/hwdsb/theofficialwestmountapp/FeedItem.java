@@ -2,16 +2,13 @@ package hwdsb.theofficialwestmountapp;
 
 import java.util.Date;
 
-/**
- * Created by danielsong on 2017-01-18.
- */
-
 public class FeedItem {
 
     String title;
     String link;
     Date pubDate;
 
+    // Getters and setters for the titles, descriptions, and publication dates of the feed items
     public String getTitle() {
         return title;
     }
